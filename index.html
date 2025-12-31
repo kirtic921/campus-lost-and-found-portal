@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NIT Patna Lost & Found Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+  <div class="nav-left">
+    <img src="nitp-logo.png" alt="NIT Patna Logo" class="nav-logo">
+    <span class="nav-title">Campus Lost & Found Portal</span>
+  </div>
+
+  <div class="nav-right">
+    <a href="index.html">Home</a>
+    <a href="report-lost.html">Report Lost</a>
+    <a href="report-found.html">Report Found</a>
+  </div>
+</nav>
+
+  <!-- HERO SECTION -->
+  <header class="hero">
+    <div class="overlay">
+      <h1>NIT Patna Lost & Found Portal</h1>
+      <p class="tagline">Find, Report & Reclaim Lost Items</p>
+
+      <div class="hero-buttons">
+        <a href="report-lost.html" class="btn lost">Report Lost Item</a>
+        <a href="report-found.html" class="btn found">Report Found Item</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ITEMS SECTION -->
+  <section class="items">
+    <h2>Recent Listings</h2>
+    <p class="hint">Live campus updates powered by Google Firebase</p>
+
+     <div class="filters">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Search item (wallet, phone...)"
+  >
+
+  <select id="statusFilter">
+    <option value="all">All</option>
+    <option value="lost">Lost</option>
+    <option value="found">Found</option>
+  </select>
+</div>
+
+    <div class="item-grid" id="itemsGrid">
+
+        <div class="item-card">
+  <img src="found.jpg" alt="Found Item">
+  <div class="content">
+    <span class="status found">Found</span>
+    <h3>Earbuds</h3>
+    <p>Location: Library</p>
+  </div>
+</div>
+
+<div class="item-card">
+<img src="lost1.jpg" alt="Lost Item">
+  <div class="content">
+    <span class="status lost">Lost</span>
+    <h3>Wallet</h3>
+    <p>Location: Playground</p>
+  </div>
+</div>
+
+      <!-- Cards will come from Firebase later -->
+    </div>
+  </section>
+
+  <script src="firebase .js"></script>
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxoAqmgByFpMKG2vU0vDnI3GsN6O778PI",
+    authDomain: "campus-lost-and-found-21faa.firebaseapp.com",
+    projectId: "campus-lost-and-found-21faa",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+  const currentUserId = localStorage.getItem("userId");
+
+  const itemsGrid = document.getElementById("itemsGrid");
+  const searchInput = document.getElementById("searchInput");
+  const statusFilter = document.getElementById("statusFilter");
+
+  let allItems = [];
+
+  // 1️⃣ Fetch all items from Firestore
+  db.collection("items")
+    .orderBy("createdAt", "desc")
+    .onSnapshot((snapshot) => {
+      allItems = [];
+
+      snapshot.forEach((doc) => {
+        allItems.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+
+      renderItems();
+    });
+
+  // 2️⃣ Render items based on search + filter
+  function renderItems() {
+    const searchText = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+
+    itemsGrid.innerHTML = "";
+
+    allItems
+      .filter((item) => {
+        
+        const matchesSearch =
+          item.itemName.toLowerCase().includes(searchText);
+
+        const matchesStatus =
+          status === "all" || item.status === status;
+
+        return matchesSearch && matchesStatus;
+      })
+      .forEach((item) => {
+        const card = document.createElement("div");
+        card.className = `item-card ${item.resolved ? 'resolved-card' : ''}`;
+
+
+        card.innerHTML = `
+          <img src="${item.imageUrl || 'placeholder.png'}">
+          <h3>${item.itemName}</h3>
+          <p>${item.description}</p>
+          <p><strong>Location:</strong> ${item.location}</p>
+          
+           
+          ${item.aiSummary ? `
+  <div class="ai-box">
+    <strong>Gemini AI Summary:</strong>
+    <p class="ai-summary">${item.aiSummary}</p>
+  </div>
+` : ""}
+
+          <span class="status ${item.status}">
+            ${item.status.toUpperCase()}
+          </span>
+          ${item.resolved ? `<span class="resolved-tag">RESOLVED</span>` : ''}
+          
+          <button class="contact-btn">View Contact</button>
+  <p class="contact-info" style="display:none;">
+    <strong>Contact:</strong> ${item.contact}
+  </p>
+  
+          ${item.ownerId === currentUserId ? `
+<button class="resolve-btn ${item.resolved ? 'undo' : ''}">
+  ${item.resolved ? 'Undo Resolve' : 'Mark as Resolved'}
+</button>
+` : ''}
+
+        `;
+       
+        const resolveBtn = card.querySelector(".resolve-btn");
+
+        const contactBtn = card.querySelector(".contact-btn");
+const contactInfo = card.querySelector(".contact-info");
+
+const modal = document.getElementById("contactModal");
+const modalContact = document.getElementById("modalContact");
+const closeBtn = document.querySelector(".close");
+
+contactBtn.addEventListener("click", () => {
+  modal.style.display = "block";
+  modalContact.innerHTML = `<strong>Contact No.:</strong> ${item.contact}`;
+});
+
+closeBtn.onclick = () => {
+  modal.style.display = "none";
+};
+
+window.onclick = (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+};
+
+        if (resolveBtn && item.ownerId === currentUserId) {
+  resolveBtn.addEventListener("click", async () => {
+    await db.collection("items").doc(item.id).update({
+      resolved: !item.resolved
+    });
+  });
+}
+
+      
+
+
+if (resolveBtn) {
+  resolveBtn.addEventListener("click", async () => {
+  await db.collection("items").doc(item.id).update({
+    resolved: !item.resolved
+  });
+});
+}
+
+        itemsGrid.appendChild(card);
+      });
+  }
+
+  // 3️⃣ Listen to user actions
+  searchInput.addEventListener("input", renderItems);
+  statusFilter.addEventListener("change", renderItems);
+</script>
+
+<!-- Contact Modal -->
+<div id="contactModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>Contact Details</h3>
+    <p id="modalContact"></p>
+  </div>
+</div>
+
+</body>
+</html>
