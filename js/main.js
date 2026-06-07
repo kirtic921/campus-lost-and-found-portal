@@ -1,88 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>NIT Patna Lost & Found Portal</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <nav class="navbar">
-  <div class="nav-left">
-    <img src="nitp-logo.png" alt="NIT Patna Logo" class="nav-logo">
-    <span class="nav-title">Campus Lost & Found Portal</span>
-  </div>
-
-  <div class="nav-right">
-    <a href="index.html">Home</a>
-    <a href="report-lost.html">Report Lost</a>
-    <a href="report-found.html">Report Found</a>
-  </div>
-</nav>
-
-  <!-- HERO SECTION -->
-  <header class="hero">
-    <div class="overlay">
-      <h1>NIT Patna Lost & Found Portal</h1>
-      <p class="tagline">Find, Report & Reclaim Lost Items</p>
-
-      <div class="hero-buttons">
-        <a href="report-lost.html" class="btn lost">Report Lost Item</a>
-        <a href="report-found.html" class="btn found">Report Found Item</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- ITEMS SECTION -->
-  <section class="items">
-    <h2>Recent Listings</h2>
-    <p class="hint">Live campus updates powered by Google Firebase</p>
-
-     <div class="filters">
-  <input 
-    type="text" 
-    id="searchInput" 
-    placeholder="Search item (wallet, phone...)"
-  >
-
-  <select id="statusFilter">
-    <option value="all">All</option>
-    <option value="lost">Lost</option>
-    <option value="found">Found</option>
-  </select>
-</div>
-
-    <div class="item-grid" id="itemsGrid">
-
-        <div class="item-card">
-  <img src="found.jpg" alt="Found Item">
-  <div class="content">
-    <span class="status found">Found</span>
-    <h3>Earbuds</h3>
-    <p>Location: Library</p>
-  </div>
-</div>
-
-<div class="item-card">
-<img src="lost1.jpg" alt="Lost Item">
-  <div class="content">
-    <span class="status lost">Lost</span>
-    <h3>Wallet</h3>
-    <p>Location: Playground</p>
-  </div>
-</div>
-
-      <!-- Cards will come from Firebase later -->
-    </div>
-  </section>
-
-  <script src="firebase .js"></script>
-  <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCxoAqmgByFpMKG2vU0vDnI3GsN6O778PI",
     authDomain: "campus-lost-and-found-21faa.firebaseapp.com",
     projectId: "campus-lost-and-found-21faa",
@@ -90,9 +6,9 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-</script>
 
-<script>
+
+
   const currentUserId = localStorage.getItem("userId");
 
   const itemsGrid = document.getElementById("itemsGrid");
@@ -222,16 +138,21 @@ if (resolveBtn) {
   // 3️ Listen to user actions
   searchInput.addEventListener("input", renderItems);
   statusFilter.addEventListener("change", renderItems);
-</script>
 
-<!-- Contact Modal -->
-<div id="contactModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h3>Contact Details</h3>
-    <p id="modalContact"></p>
-  </div>
-</div>
 
-</body>
-</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
